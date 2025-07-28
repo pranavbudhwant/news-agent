@@ -7,11 +7,14 @@ import json
 from typing import Dict, Tuple
 from openai import OpenAI
 from exa_py import Exa
+from dotenv import load_dotenv
+
+load_dotenv()
 
 class NewsAgent:
     """AI News Agent with OpenAI Assistants API"""
     
-    def __init__(self, user_preferences):
+    def __init__(self):
         """Initialize the agent with OpenAI client"""
         self.api_key = os.getenv('OPENAI_API_KEY')
         if not self.api_key:
@@ -64,7 +67,7 @@ class NewsAgent:
         ]
 
         # Initialize user preferences with provided values or defaults
-        self.user_preferences = user_preferences or {
+        self.user_preferences = {
             "tone_of_voice": None,
             "response_format": None,
             "language": None,
@@ -95,11 +98,6 @@ class NewsAgent:
                                     "type": "string", 
                                     "description": "The search query for news articles"
                                 },
-                                "num_results": {
-                                    "type": "integer", 
-                                    "description": "Number of results to return", 
-                                    "default": 5
-                                }
                             },
                             "required": ["query"]
                         }
@@ -113,12 +111,6 @@ class NewsAgent:
                                 "article_content": {
                                     "type": "string", 
                                     "description": "The full content of the article to summarize"
-                                },
-                                "summary_length": {
-                                    "type": "string", 
-                                    "description": "Length of summary: short, medium, or long", 
-                                    "enum": ["short", "medium", "long"],
-                                    "default": "medium"
                                 }
                             },
                             "required": ["article_content"]
@@ -261,17 +253,15 @@ class NewsAgent:
         try:
             if function_name == "search_news":
                 query = arguments.get("query", "")
-                num_results = arguments.get("num_results", 5)
                 
                 # Use Exa API to search for news
-                return self._search_news_with_exa(query, num_results)
+                return self._search_news_with_exa(query)
                 
             elif function_name == "summarize_article":
                 article_content = arguments.get("article_content", "")
-                summary_length = arguments.get("summary_length", "medium")
                 
                 # Use OpenAI to summarize the article
-                return self._summarize_article_with_openai(article_content, summary_length)
+                return self._summarize_article_with_openai(article_content)
                 
             else:
                 return json.dumps({
@@ -286,7 +276,7 @@ class NewsAgent:
                  "function": function_name
              })
     
-    def _search_news_with_exa(self, query: str, num_results: int = 5) -> str:
+    def _search_news_with_exa(self, query: str) -> str:
         """Exa AI News Fetcher: Fetches the latest news articles on a given topic using the Exa API"""
         try:
             # Search for news articles using Exa API
@@ -294,61 +284,36 @@ class NewsAgent:
                 query,
                 type="auto",
                 category="news",
-                num_results=min(num_results, 10),  # Limit to 10 max
                 text=True,
-                summary={
-                    "query": "Main developments and key points"
-                },
-                subpages=1,
-                subpage_target="sources",
-                extras={
-                    "links": 1,
-                    "image_links": 1
-                }
             )
-            
+
             # Format results for the assistant
             formatted_results = []
             for result in results.results:
                 formatted_result = {
+                    "id": result.id,
                     "title": result.title,
                     "url": result.url,
-                    "summary": getattr(result, 'summary', {}).get('text', '') if hasattr(result, 'summary') else '',
-                    "content_snippet": result.text[:300] + "..." if result.text and len(result.text) > 300 else result.text or '',
-                    "published_date": getattr(result, 'published_date', ''),
-                    "author": getattr(result, 'author', ''),
-                    "score": getattr(result, 'score', 0)
+                    "publishedDate": result.published_date,
+                    "author": result.author,
+                    "text": result.text,
                 }
                 formatted_results.append(formatted_result)
             
             return json.dumps({
                 "status": "success",
-                "query": query,
-                "results": formatted_results,
-                "total_found": len(formatted_results)
+                "results": formatted_results
             })
             
         except Exception as e:
             return json.dumps({
                 "status": "error",
                 "error": f"Failed to search news with Exa API: {str(e)}",
-                "query": query
             })
     
-    def _summarize_article_with_openai(self, article_content: str, summary_length: str = "medium") -> str:
+    def _summarize_article_with_openai(self, article_content: str) -> str:
         """News Summarizer: Summarizes article content using OpenAI chat completion"""
-        try:
-            # Determine prompt based on summary length
-            if summary_length == "short":
-                length_instruction = "in 1-2 sentences"
-                max_tokens = 100
-            elif summary_length == "long":
-                length_instruction = "in 4-6 paragraphs with detailed analysis"
-                max_tokens = 800
-            else:  # medium
-                length_instruction = "in 2-3 paragraphs"
-                max_tokens = 300
-            
+        try:          
             # Fixed prompt for summarization
             system_prompt = f"""You are a professional news summarizer. Your task is to create a clear, accurate, and concise summary of the provided article content.
 
@@ -356,7 +321,6 @@ Guidelines:
 - Focus on the key facts, main points, and important details
 - Maintain objectivity and avoid personal opinions
 - Preserve the essential information and context
-- Write {length_instruction}
 - Use clear, accessible language"""
 
             user_prompt = f"Please summarize the following article content:\n\n{article_content}"
@@ -368,7 +332,6 @@ Guidelines:
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_prompt}
                 ],
-                max_tokens=max_tokens,
                 temperature=0.3  # Lower temperature for more consistent summaries
             )
             
@@ -377,16 +340,12 @@ Guidelines:
             return json.dumps({
                 "status": "success",
                 "summary": summary,
-                "length": summary_length,
-                "original_length": len(article_content),
-                "summary_length": len(summary)
             })
             
         except Exception as e:
             return json.dumps({
                 "status": "error",
                 "error": f"Failed to summarize article: {str(e)}",
-                "original_length": len(article_content)
             })
     
     def _create_thread(self) -> str:
@@ -405,7 +364,7 @@ User Preferences:
 - Response Format: {preferences.get('response_format', 'not specified')}: Ensure to format all your responses in this format.
 - Language: {preferences.get('language', 'not specified')}: Always respond in this language.
 - Interaction Style: {preferences.get('interaction_style', 'not specified')}: Always respond in this interaction style.
-- Preferred News Topics: {', '.join(preferences.get('news_topics', [])) if preferences.get('news_topics') else 'not specified'}: 
+- Preferred News Topics: {', '.join(preferences.get('news_topics', [])) if preferences.get('news_topics') else 'not specified'}: Use these preferred news topics to craft queries when searching for news articles unless explicitly specified otherwise.
 
 You have access to tools for:
 - Searching for news articles (search_news)
@@ -414,16 +373,6 @@ You have access to tools for:
 Use these tools when users ask about current events, specific news topics, or when they need article summaries.
 
 Remember to match their tone, format, language, and interaction style preferences."""
-    
-    def create_new_session(self) -> Dict:
-        """Create a new session (thread)"""
-        thread_id = self._create_thread()
-        return {
-            "thread_id": thread_id,
-            "assistant_id": self.assistant_id,
-            "preferences": {},
-            "preferences_complete": False
-        }
 
 # Global agent instance
 news_agent = NewsAgent()

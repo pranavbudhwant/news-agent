@@ -19,13 +19,7 @@ messages = []
 sessions = {}  # Store session data per client
 
 # Initialize the news agent
-news_agent = NewsAgent({
-    'tone_of_voice': None,
-    'response_format': None,
-    'language': None,
-    'interaction_style': None,
-    'news_topics': None
-})
+news_agent = NewsAgent()
 
 @app.route('/')
 def health_check():
