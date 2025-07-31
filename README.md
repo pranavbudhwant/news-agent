@@ -4,7 +4,7 @@ A real-time news agent application with a Next.js frontend and Flask backend tha
 
 ## Prerequisites
 
-- Python 3.8+
+- Python 3.9+
 - Node.js 18+
 - npm or pnpm
 
@@ -13,22 +13,23 @@ A real-time news agent application with a Next.js frontend and Flask backend tha
 ### Backend (Flask Server)
 
 1. Navigate to the Flask server directory:
+
    ```bash
    cd flask-server
    ```
-
 2. Install Python dependencies:
+
    ```bash
    pip install -r requirements.txt
    ```
-
 3. Set up environment variables (create a `.env` file):
+
    ```
    OPENAI_API_KEY=your_openai_api_key_here
    EXA_API_KEY=your_exa_api_key_here
    ```
-
 4. Start the Flask server:
+
    ```bash
    python server.py
    ```
@@ -38,18 +39,19 @@ The backend will run on `http://localhost:5001`
 ### Frontend (Next.js)
 
 1. Navigate to the client directory:
+
    ```bash
    cd client
    ```
-
 2. Install dependencies:
+
    ```bash
    npm install
    # or
    pnpm install
    ```
-
 3. Start the development server:
+
    ```bash
    npm run dev
    # or
