@@ -1,7 +1,3 @@
-"""
-News agent with OpenAI Assistants API integration.
-"""
-
 import os
 import json
 from typing import Dict, Tuple
@@ -65,15 +61,24 @@ class NewsAgent:
                 "description": "Preferred news topics"
             }
         ]
+    
+    def _build_system_prompt(self, preferences: Dict) -> str:
+        """Build system prompt with user preferences"""
+        return f"""You are a helpful AI news agent. 
 
-        # Initialize user preferences with provided values or defaults
-        self.user_preferences = {
-            "tone_of_voice": None,
-            "response_format": None,
-            "language": None,
-            "interaction_style": None,
-            "news_topics": None
-        }
+User Preferences:
+- Tone of Voice: {preferences.get('tone_of_voice', 'not specified')}: Always format your responses in this tone of voice.
+- Response Format: {preferences.get('response_format', 'not specified')}: Ensure to format all your responses in this format.
+- Language: {preferences.get('language', 'not specified')}: Always respond in this language.
+- Interaction Style: {preferences.get('interaction_style', 'not specified')}: Always respond in this interaction style.
+- Preferred News Topics: {preferences.get('news_topics', 'not specified')}: Use these preferred news topics to craft queries when searching for news articles unless explicitly specified otherwise.
+
+You have access to tools for:
+- Fetching the latest news articles on a given topic (search_news)
+- Summarizing fetched news articles to provide concise information to the user (summarize_article)
+
+Unless the user asks for a summary, or the information in a concise manner, use the search_news tool to fetch the latest news articles on a given topic, and simply return the results in appropriate formatting. 
+Remember to match their tone, format, language, and interaction style preferences."""
 
     def _get_or_create_assistant(self, preferences: Dict) -> str:
         """Create or get assistant with current preferences"""
@@ -91,6 +96,7 @@ class NewsAgent:
                     {"type": "function", "function": {
                         "name": "search_news",
                         "description": "Search for news articles on a specific topic",
+                        "strict": True,
                         "parameters": {
                             "type": "object",
                             "properties": {
@@ -99,12 +105,14 @@ class NewsAgent:
                                     "description": "The search query for news articles"
                                 },
                             },
+                            "additionalProperties": False,
                             "required": ["query"]
                         }
                     }},
                     {"type": "function", "function": {
                         "name": "summarize_article",
                         "description": "Summarize a news article",
+                        "strict": True,
                         "parameters": {
                             "type": "object",
                             "properties": {
@@ -113,6 +121,7 @@ class NewsAgent:
                                     "description": "The full content of the article to summarize"
                                 }
                             },
+                            "additionalProperties": False,
                             "required": ["article_content"]
                         }
                     }}
@@ -132,6 +141,13 @@ class NewsAgent:
                 print(f"Updated assistant {self.assistant_id} with new system prompt")
         
         return self.assistant_id
+
+    def _create_thread(self) -> str:
+        """Create a new thread"""
+        thread = self.client.beta.threads.create()
+        self.thread_id = thread.id
+        print(f"Created new thread with ID: {thread.id}")
+        return self.thread_id
 
     def process_message(self, thread_id: str, user_message: str, preferences: Dict = None) -> Tuple[str, Dict]:
         """
@@ -348,31 +364,6 @@ Guidelines:
                 "error": f"Failed to summarize article: {str(e)}",
             })
     
-    def _create_thread(self) -> str:
-        """Create a new thread"""
-        thread = self.client.beta.threads.create()
-        self.thread_id = thread.id
-        print(f"Created new thread with ID: {thread.id}")
-        return self.thread_id
-    
-    def _build_system_prompt(self, preferences: Dict) -> str:
-        """Build system prompt with user preferences"""
-        return f"""You are a helpful AI news agent. 
-
-User Preferences:
-- Tone of Voice: {preferences.get('tone_of_voice', 'not specified')}: Always format your responses in this tone of voice.
-- Response Format: {preferences.get('response_format', 'not specified')}: Ensure to format all your responses in this format.
-- Language: {preferences.get('language', 'not specified')}: Always respond in this language.
-- Interaction Style: {preferences.get('interaction_style', 'not specified')}: Always respond in this interaction style.
-- Preferred News Topics: {', '.join(preferences.get('news_topics', [])) if preferences.get('news_topics') else 'not specified'}: Use these preferred news topics to craft queries when searching for news articles unless explicitly specified otherwise.
-
-You have access to tools for:
-- Searching for news articles (search_news)
-- Summarizing articles (summarize_article)
-
-Use these tools when users ask about current events, specific news topics, or when they need article summaries.
-
-Remember to match their tone, format, language, and interaction style preferences."""
 
 # Global agent instance
 news_agent = NewsAgent()

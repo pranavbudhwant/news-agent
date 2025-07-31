@@ -208,67 +208,6 @@ def process_with_news_agent(client_id, user_input):
         error_message = f"I apologize, but I encountered an error: {str(e)}"
         send_bot_response(client_id, error_message, delay=0.5)
 
-@socketio.on('delete_message')
-def handle_delete_message(data):
-    """Handle deleting a message"""
-    message_id = data.get('message_id')
-    
-    if not message_id:
-        emit('error', {'message': 'Message ID is required'})
-        return
-    
-    # Find the message
-    message_to_delete = None
-    for i, msg in enumerate(messages):
-        if msg['id'] == message_id:
-            # Only allow deletion of user messages (not bot messages)
-            if msg['user_id'] == 'user':
-                message_to_delete = messages.pop(i)
-                break
-            else:
-                emit('error', {'message': 'You can only delete your own messages'})
-                return
-    
-    if message_to_delete:
-        # Notify all clients about message deletion
-        emit('message_deleted', {
-            'message_id': message_id,
-            'deleted_by': 'User'
-        }, broadcast=True)
-    else:
-        emit('error', {'message': 'Message not found'})
-
-@socketio.on('clear_chat')
-def handle_clear_chat():
-    """Handle clearing all messages"""
-    client_id = request.sid
-    global messages
-    message_count = len(messages)
-    messages.clear()
-    
-    # Reset session preferences
-    if client_id in sessions:
-        sessions[client_id]['preferences_complete'] = False
-        sessions[client_id]['current_preference_index'] = 0
-        sessions[client_id]['message_count'] = 0
-        sessions[client_id]['preferences'] = {
-            'tone_of_voice': None,
-            'response_format': None,
-            'language': None,
-            'interaction_style': None,
-            'news_topics': None
-        }
-        
-        # Reset preferences in UI
-        emit('preferences_reset', room=client_id)
-    
-    # Notify all clients that chat was cleared
-    emit('chat_cleared', {
-        'cleared_by': 'User',
-        'message': f'Chat cleared ({message_count} messages removed)',
-        'timestamp': datetime.now().isoformat()
-    }, broadcast=True)
-
 if __name__ == '__main__':
     print("🚀 Starting WebSocket Chat Server with News Agent...")
     print("📡 Server will be available at: http://localhost:5001")
@@ -277,7 +216,5 @@ if __name__ == '__main__':
     print("  connect          - Client connection")
     print("  disconnect       - Client disconnection")
     print("  send_message     - Send a message")
-    print("  delete_message   - Delete your message")
-    print("  clear_chat       - Clear all messages")
     
     socketio.run(app, debug=True, host='0.0.0.0', port=5001)
