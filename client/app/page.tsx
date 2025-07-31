@@ -151,27 +151,27 @@ export default function Chat() {
   const disabled = isLoading || input.length === 0 || !isConnected;
 
   return (
-    <div className="h-screen bg-black overflow-hidden flex flex-col">
+    <div className="h-screen bg-white overflow-hidden flex flex-col">
       {/* Full width header - always visible */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-800 bg-gray-900 w-full flex-shrink-0">
-        <h1 className="text-xl font-semibold text-white">Chat</h1>
+      <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-white w-full flex-shrink-0">
+        <h1 className="text-xl font-semibold text-gray-900">Chat</h1>
         <div className={clsx(
           "px-3 py-1 rounded-full text-xs font-medium",
           isConnected 
-            ? "bg-green-900 text-green-300 border border-green-700" 
-            : "bg-red-900 text-red-300 border border-red-700"
+            ? "bg-green-100 text-green-800 border border-green-300" 
+            : "bg-red-100 text-red-800 border border-red-300"
         )}>
           {isConnected ? "Connected" : "Disconnected"}
         </div>
       </div>
 
       {/* Main content area with sidebar and chat */}
-      <div className="flex-1 flex bg-black overflow-hidden">
+      <div className="flex-1 flex bg-gray-50 overflow-hidden">
         {/* Preferences Sidebar */}
-        <div className="w-80 bg-gray-900 border-r border-gray-800 flex-shrink-0 p-4">
+        <div className="w-80 bg-white border-r border-gray-200 flex-shrink-0 p-4">
           <div className="mb-4">
-            <h2 className="text-lg font-semibold text-white mb-2">Preferences</h2>
-            <p className="text-sm text-gray-400">Your chat preferences</p>
+            <h2 className="text-lg font-semibold text-gray-900 mb-2">Preferences</h2>
+            <p className="text-sm text-gray-600">Your chat preferences</p>
           </div>
           
           <div className="space-y-3">
@@ -181,24 +181,24 @@ export default function Chat() {
                 className={clsx(
                   "p-3 rounded-lg border transition-all duration-200",
                   preference.isCompleted
-                    ? "bg-green-900/20 border-green-700/50"
-                    : "bg-gray-800/50 border-gray-700/50"
+                    ? "bg-green-100 border-green-300"
+                    : "bg-gray-100 border-gray-300"
                 )}
               >
                 <div className="flex items-start space-x-3">
                   <div className="flex-shrink-0 mt-0.5">
                     {preference.isCompleted ? (
-                      <CheckCircle className="w-5 h-5 text-green-400" />
+                      <CheckCircle className="w-5 h-5 text-green-600" />
                     ) : (
-                      <Circle className="w-5 h-5 text-gray-400" />
+                      <Circle className="w-5 h-5 text-gray-500" />
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium text-white">
+                    <div className="text-sm font-medium text-gray-900">
                       {preference.label}
                     </div>
                     {preference.isCompleted && preference.value && (
-                      <div className="text-xs text-gray-300 mt-1">
+                      <div className="text-xs text-gray-600 mt-1">
                         {preference.value}
                       </div>
                     )}
@@ -207,31 +207,13 @@ export default function Chat() {
               </div>
             ))}
           </div>
-          
-          {/* Progress indicator */}
-          <div className="mt-6 p-3 bg-gray-800 rounded-lg">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-gray-300">Progress</span>
-              <span className="text-sm text-gray-300">
-                {preferences.filter(p => p.isCompleted).length}/{preferences.length}
-              </span>
-            </div>
-            <div className="w-full bg-gray-700 rounded-full h-2">
-              <div 
-                className="bg-green-500 h-2 rounded-full transition-all duration-300"
-                style={{ 
-                  width: `${(preferences.filter(p => p.isCompleted).length / preferences.length) * 100}%` 
-                }}
-              />
-            </div>
-          </div>
         </div>
 
         {/* Chat area - centered with max width */}
-        <div className="flex-1 flex justify-center bg-black overflow-hidden">
+        <div className="flex-1 flex justify-center bg-gray-50 overflow-hidden">
           <div className="w-full max-w-4xl flex flex-col">
             {/* Messages area with transparent scrollbar - only this scrolls */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-black scrollbar-hide" style={{
+            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50 scrollbar-hide" style={{
               scrollbarWidth: 'none',
               msOverflowStyle: 'none',
             }}>
@@ -243,11 +225,11 @@ export default function Chat() {
               {messages.length === 0 ? (
                 <div className="flex items-center justify-center h-full">
                   <div className="text-center">
-                    <div className="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Bot className="w-8 h-8 text-gray-400" />
+                    <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Bot className="w-8 h-8 text-gray-600" />
                     </div>
-                    <h2 className="text-2xl font-bold text-white mb-2">Welcome to Chat</h2>
-                    <p className="text-gray-400">
+                    <h2 className="text-2xl font-bold text-gray-900 mb-2">Welcome to Chat</h2>
+                    <p className="text-gray-600">
                       {isConnected 
                         ? "Send a message to start the conversation" 
                         : "Connecting to chat server..."}
@@ -274,7 +256,7 @@ export default function Chat() {
                         <div
                           className={clsx(
                             "w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0",
-                            message.role === "user" ? "bg-blue-600" : "bg-gray-600"
+                            message.role === "user" ? "bg-blue-600" : "bg-gray-500"
                           )}
                         >
                           {message.role === "user" ? (
@@ -290,35 +272,37 @@ export default function Chat() {
                             "px-4 py-2 rounded-2xl shadow-sm",
                             message.role === "user" 
                               ? "bg-blue-600 text-white rounded-br-md" 
-                              : "bg-gray-700 text-white rounded-bl-md"
+                              : "bg-white text-gray-900 rounded-bl-md border border-gray-200"
                           )}
                         >
-                          <ReactMarkdown
-                            className={clsx(
-                              "prose prose-sm prose-invert",
-                              "prose-p:leading-relaxed prose-p:m-0",
-                              "prose-pre:bg-black prose-pre:text-gray-300",
-                              "prose-code:text-gray-300 prose-code:bg-black prose-code:px-1 prose-code:rounded",
-                              message.role === "user" 
-                                ? "prose-a:text-blue-200 prose-a:hover:text-blue-100" 
-                                : "prose-a:text-blue-400 prose-a:hover:text-blue-300"
-                            )}
-                            remarkPlugins={[remarkGfm]}
-                            components={{
-                              a: (props: any) => (
-                                <a {...props} target="_blank" rel="noopener noreferrer" />
-                              ),
-                              p: ({ children }) => <div>{children}</div>,
-                            }}
-                          >
-                            {message.content}
-                          </ReactMarkdown>
+                          <div className={message.role === "user" ? "text-white [&_*]:text-white" : ""}>
+                            <ReactMarkdown
+                              className={clsx(
+                                "prose prose-sm",
+                                "prose-p:leading-relaxed prose-p:m-0",
+                                "prose-pre:bg-gray-100 prose-pre:text-gray-800",
+                                "prose-code:text-gray-800 prose-code:bg-gray-100 prose-code:px-1 prose-code:rounded",
+                                message.role === "user" 
+                                  ? "prose-a:text-blue-200 prose-a:hover:text-blue-100 prose-p:text-white prose-strong:text-white prose-em:text-white prose-ul:text-white prose-ol:text-white prose-li:text-white prose-blockquote:text-white prose-h1:text-white prose-h2:text-white prose-h3:text-white prose-h4:text-white prose-h5:text-white prose-h6:text-white prose:text-white [&_*]:text-white" 
+                                  : "prose-a:text-blue-600 prose-a:hover:text-blue-700"
+                              )}
+                              remarkPlugins={[remarkGfm]}
+                              components={{
+                                a: (props: any) => (
+                                  <a {...props} target="_blank" rel="noopener noreferrer" />
+                                ),
+                                p: ({ children }) => <div>{children}</div>,
+                              }}
+                            >
+                              {message.content}
+                            </ReactMarkdown>
+                          </div>
                           
                           {/* Timestamp */}
                           <div
                             className={clsx(
                               "text-xs mt-1 opacity-70",
-                              message.role === "user" ? "text-blue-100" : "text-gray-300"
+                              message.role === "user" ? "text-blue-100" : "text-gray-500"
                             )}
                           >
                             {new Date(message.timestamp).toLocaleTimeString([], { 
@@ -357,7 +341,7 @@ export default function Chat() {
                       }
                     }}
                     disabled={!isConnected}
-                    className="w-full resize-none bg-gray-800 border border-gray-700 rounded-2xl px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full resize-none bg-white border border-gray-300 rounded-2xl px-4 py-3 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
                   />
                 </div>
                 
@@ -367,7 +351,7 @@ export default function Chat() {
                   className={clsx(
                     "w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 flex-shrink-0",
                     disabled
-                      ? "bg-gray-700 cursor-not-allowed"
+                      ? "bg-gray-300 cursor-not-allowed"
                       : "bg-blue-600 hover:bg-blue-700 active:scale-95"
                   )}
                 >
@@ -377,7 +361,7 @@ export default function Chat() {
                     <SendIcon
                       className={clsx(
                         "w-5 h-5",
-                        disabled ? "text-gray-400" : "text-white"
+                        disabled ? "text-gray-500" : "text-white"
                       )}
                     />
                   )}

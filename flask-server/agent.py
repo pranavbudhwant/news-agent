@@ -74,11 +74,16 @@ User Preferences:
 - Preferred News Topics: {preferences.get('news_topics', 'not specified')}: Use these preferred news topics to craft queries when searching for news articles unless explicitly specified otherwise.
 
 You have access to tools for:
-- Fetching the latest news articles on a given topic (search_news)
-- Summarizing fetched news articles to provide concise information to the user (summarize_article)
+- Fetching the latest news articles on a given topic: search_news
+- Summarizing fetched news articles to provide concise information to the user: summarize_article
 
-Unless the user asks for a summary, or the information in a concise manner, use the search_news tool to fetch the latest news articles on a given topic, and simply return the results in appropriate formatting. 
-Remember to match their tone, format, language, and interaction style preferences."""
+Rules:
+- Constructing the search query while using the search_news tool:
+    - Unless a topic is explicitly specified, always use the user's preferred news topics to generate the search query.
+- Always provide links to the articles where possible.
+
+In all your responses, match the user's tone, format, language, and interaction style preferences.
+"""
 
     def _get_or_create_assistant(self, preferences: Dict) -> str:
         """Create or get assistant with current preferences"""

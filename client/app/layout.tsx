@@ -6,14 +6,13 @@ import Toaster from "./toaster";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "Chat App – Real-time messaging",
-  description:
-    "Real-time chat application built with WebSockets and Next.js.",
+  title: "Latest News Agent",
+  description: "Latest News Agent",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en">
       <body className={inter.className}>
         {children}
         <Toaster />

@@ -3,3 +3,4 @@ flask-cors==4.0.0
 flask-socketio==5.3.6
 openai>=1.48.0
 exa-py>=1.14.18 
+python-dotenv==1.0.0
